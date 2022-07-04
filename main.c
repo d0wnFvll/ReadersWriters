@@ -30,21 +30,21 @@ static struct timespec order_time;
 static unsigned int rdcnt = 0;
 
 struct entry {
-	int data;
-	SLIST_ENTRY(entry) entries;
+    int data;
+    SLIST_ENTRY(entry) entries;
 };
 
 SLIST_HEAD(slisthead, entry);
 
 static void* writer(void* arg) {
-	struct slisthead *head = (struct slisthead*) arg;
+    struct slisthead *head = (struct slisthead*) arg;
 
-	putchar('\n');
+    putchar('\n');
 
     for(int i = 0; i < ITERS; ++i) {
         if(sem_timedwait(&order, &order_time) == 0) {
-        	printf("Writer is waiting on the %d iteration\n", i);
-		}
+            printf("Writer is waiting on the %d iteration\n", i);
+        }
 
         sem_timedwait(&resource, &resource_time);
         sem_post(&order);
@@ -63,15 +63,15 @@ static void* writer(void* arg) {
 }
 
 static void* reader(void* arg) {
-	struct slisthead *head = (struct slisthead*) arg;
+    struct slisthead *head = (struct slisthead*) arg;
 
-	putchar('\n');
+    putchar('\n');
 
     for(int i = 0; i < ITERS; ++i)
     {
         if(sem_timedwait(&order, &order_time) == 0) {
-			printf("Reader is waiting on the %d iteration...\n", i);
-		}
+            printf("Reader is waiting on the %d iteration...\n", i);
+        }
 
         sem_timedwait(&rmutex, &rmutex_time);
 
@@ -99,13 +99,13 @@ static void* reader(void* arg) {
 }
 
 int main() {
-	pthread_t readers_id[READERS];
-	pthread_t writers_id[WRITERS];
+    pthread_t readers_id[READERS];
+    pthread_t writers_id[WRITERS];
 
     struct slisthead head;
     struct entry* ep;
 
-	SLIST_INIT(&head);
+    SLIST_INIT(&head);
 
     sem_init(&resource, 0, 1);
     sem_init(&rmutex, 0, 1);
@@ -131,12 +131,12 @@ int main() {
     }
 
     for(int i = 0; i < WRITERS; ++i) {
-	    pthread_join(writers_id[i], NULL);
+        pthread_join(writers_id[i], NULL);
     }
 
     for(int i = 0; i < READERS; ++i) {
-	    pthread_join(readers_id[i], NULL);
-   	}
+        pthread_join(readers_id[i], NULL);
+    }
 
     putchar('\n');
 
@@ -144,13 +144,13 @@ int main() {
     sem_destroy(&rmutex);
     sem_destroy(&order);
 
-	while (!SLIST_EMPTY(&head)) {
-		ep = SLIST_FIRST(&head);
-		SLIST_REMOVE_HEAD(&head, entries);
+    while (!SLIST_EMPTY(&head)) {
+        ep = SLIST_FIRST(&head);
+        SLIST_REMOVE_HEAD(&head, entries);
 
-		free(ep);
-	}
+        free(ep);
+    }
 
-	exit(EXIT_SUCCESS);
+    exit(EXIT_SUCCESS);
 }
 
